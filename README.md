@@ -29,3 +29,10 @@ Note: Honda2 modulation is more sensitive, hence more noisy.
 
 
 Note: Mac adds a .crash file to the end, remove the extension  when you put it on the flipper!(you can rename the file in the QFlipper app)
+
+
+
+https://user-images.githubusercontent.com/5160055/183486723-ce0aae23-5c37-4587-8930-6ef2ab17c6dc.mp4
+
+
+
