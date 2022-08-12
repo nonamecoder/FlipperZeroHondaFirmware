@@ -27,6 +27,8 @@ This firmware was built and designed by SkorP, the Sub-GHz architect for Flipper
 
 Note: Honda2 modulation is more sensitive, hence more noisy.
 
+UPDATE: If you're at DEFCON CHV, place the Lock and Unlock files under subghz folder and you should be all set to play with the car!
+
 
 Note: Mac adds a .crash file to the end, remove the extension  when you put it on the flipper!(you can rename the file in the QFlipper app)
 
