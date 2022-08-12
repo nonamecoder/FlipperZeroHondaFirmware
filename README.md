@@ -21,7 +21,7 @@ This firmware was built and designed by SkorP, the Sub-GHz architect for Flipper
 
 
 ## How to Use
-- SubGHz &rarr; Read RAW &rarr;
+- SubGHz &rarr; Read RAW 
 - Modulation: Honda1
 -Frequency -  433.65(preferred) or 434.17
 
