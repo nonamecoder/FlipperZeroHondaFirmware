@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!--
+__COPYRIGHT__
+
+This file is processed by the bin/SConsDoc.py module.
+See its __doc__ string for a discussion of the format.
+-->
+
+<!DOCTYPE sconsdoc [
+<!ENTITY % scons SYSTEM '../../doc/scons.mod'>
+%scons;
+<!ENTITY % builders-mod SYSTEM '../../doc/generated/builders.mod'>
+%builders-mod;
+<!ENTITY % functions-mod SYSTEM '../../doc/generated/functions.mod'>
+%functions-mod;
+<!ENTITY % tools-mod SYSTEM '../../doc/generated/tools.mod'>
+%tools-mod;
+<!ENTITY % variables-mod SYSTEM '../../doc/generated/variables.mod'>
+%variables-mod;
+]>
+
+<sconsdoc xmlns="http://www.scons.org/dbxsd/v1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.scons.org/dbxsd/v1.0 http://www.scons.org/dbxsd/v1.0/scons.xsd">
+
+<tool name="default">
+<summary>
+<para>
+Sets &consvars; for a default list of Tool modules.
+Use <emphasis role="bold">default</emphasis>
+in the tools list to retain the original defaults,
+since the <parameter>tools</parameter> parameter
+is treated as a literal statement of the tools
+to be made available in that &consenv;, not an addition.
+</para>
+
+<para>
+The list of tools selected by default is not static,
+but is dependent both on
+the platform and on the software installed on the platform.
+Some tools will not initialize if an underlying command is
+not found, and some tools are selected from a list of choices
+on a first-found basis. The finished tool list can be
+examined by inspecting the &cv-link-TOOLS; &consvar;
+in the &consenv;.
+</para>
+
+<para>
+On all platforms, the tools from the following list
+are selected if their respective conditions are met:
+<!--TODO: &t-link-filesystem; --> filesystem;,
+<!--TODO &t-link-wix; --> wix,
+&t-link-lex;, &t-link-yacc;,
+&t-link-rpcgen;, &t-link-swig;,
+&t-link-jar;, &t-link-javac;, &t-link-javah;, &t-link-rmic;,
+&t-link-dvipdf;, &t-link-dvips;, &t-link-gs;,
+&t-link-tex;, &t-link-latex;, &t-link-pdflatex;, &t-link-pdftex;,
+&t-link-tar;, &t-link-zip;, &t-link-textfile;.
+</para>
+
+<para>
+On Linux systems, the default tools list selects
+(first-found): a C compiler from
+&t-link-gcc;, &t-link-intelc;, &t-link-icc;, &t-link-cc;;
+a C++ compiler from
+&t-link-gXX;, &t-link-intelc;, &t-link-icc;, &t-link-cXX;;
+an assembler from
+&t-link-gas;, &t-link-nasm;, &t-link-masm;;
+a linker from
+&t-link-gnulink;, &t-link-ilink;;
+a Fortran compiler from
+&t-link-gfortran;, &t-link-g77;, &t-link-ifort;, &t-link-ifl;,
+&t-link-f95;, &t-link-f90;, &t-link-f77;;
+and a static archiver &t-link-ar;.
+It also selects all found from the list
+&t-link-m4;
+<!-- TODO &t-link-rpm; --> rpm.
+</para>
+
+<para>
+On Windows systems, the default tools list selects
+(first-found): a C compiler from
+&t-link-msvc;, &t-link-mingw;, &t-link-gcc;, &t-link-intelc;,
+&t-link-icl;, &t-link-icc;, &t-link-cc;, &t-link-bcc32;;
+a C++ compiler from
+&t-link-msvc;, &t-link-intelc;, &t-link-icc;, &t-link-gXX;,
+&t-link-cXX;, &t-link-bcc32;;
+an assembler from
+&t-link-masm;, &t-link-nasm;, &t-link-gas;, &t-link-386asm;;
+a linker from
+&t-link-mslink;, &t-link-gnulink;, &t-link-ilink;,
+&t-link-linkloc;, &t-link-ilink32;;
+a Fortran compiler from
+&t-link-gfortran;, &t-link-g77;, &t-link-ifl;, &t-link-cvf;,
+&t-link-f95;, &t-link-f90;, &t-link-fortran;;
+and a static archiver from
+&t-link-mslib;, &t-link-ar;, &t-link-tlib;;
+It also selects all found from the list
+&t-link-msvs;, &t-link-midl;.
+</para>
+
+<para>
+On MacOS systems, the default tools list selects
+(first-found): a C compiler from
+&t-link-gcc;, &t-link-cc;;
+a C++ compiler from
+&t-link-gXX;, &t-link-cXX;;
+an assembler &t-link-as;;
+a linker from
+&t-link-applelink;, &t-link-gnulink;;
+a Fortran compiler from
+&t-link-gfortran;, &t-link-f95;, &t-link-f90;, &t-link-g77;;
+and a static archiver &t-link-ar;.
+It also selects all found from the list
+&t-link-m4;,
+<!-- TODO &t-link-rpm; --> rpm.
+</para>
+
+<para>
+Default lists for other platforms can be found by
+examining the &scons;
+source code (see
+<filename>SCons/Tool/__init__.py</filename>).
+</para>
+
+</summary>
+</tool>
+</sconsdoc>

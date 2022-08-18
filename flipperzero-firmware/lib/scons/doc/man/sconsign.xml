@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+  __COPYRIGHT__
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+  KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+  WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<refentry id='sconsign1'
+          xmlns="http://www.scons.org/dbxsd/v1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.scons.org/dbxsd/v1.0 http://www.scons.org/dbxsd/v1.0/scons.xsd">
+<refmeta>
+<refentrytitle>SCONSIGN</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='source'>SCons __VERSION__</refmiscinfo>
+<refmiscinfo class='manual'>SCons __VERSION__</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>sconsign</refname>
+<refpurpose>print SCons signature file information</refpurpose>
+</refnamediv>
+<!-- body begins here -->
+<refsynopsisdiv id='synopsis'>
+<cmdsynopsis>
+  <command>sconsign</command>
+    <arg choice='opt' rep='repeat'><replaceable>options</replaceable></arg>
+    <arg choice='opt' rep='repeat'><replaceable>file</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+<para>
+Displays the contents of one or more
+<firstterm>sconsign files</firstterm>,
+the signature database files
+used by the <application>SCons</application> build tool.
+</para>
+
+<para>By default,
+<command>sconsign</command>
+dumps the entire contents of the
+sconsign file(s).
+Without options,
+individual dependency entries are printed in the following format:</para>
+
+<screen>
+depfile: signature timestamp length
+        implicit_dependency_1: content_signature timestamp length
+        implicit_dependency_2: content_signature timestamp length
+        ...
+        action_signature [action string]
+</screen>
+
+<para><emphasis role="bold">None</emphasis>
+is printed in place of any missing timestamp,
+ <firstterm>content signature</firstterm>
+(<emphasis role="bold">csig</emphasis>)
+or
+<firstterm>build action signature</firstterm>
+values for any entry
+or any of its dependencies.
+If the entry has no implicit dependencies,
+or no build action,
+those lines are omitted.</para>
+
+<para>By default,
+<command>sconsign</command>
+assumes that any
+<replaceable>file</replaceable>
+arguments that end with a
+<filename>.dblite</filename>
+suffix contains
+signature entries for
+more than one directory
+(that is,
+was specified by the
+<function>SConsignFile</function>
+function).
+Any
+<replaceable>file</replaceable>
+argument that has no suffix
+is assumed to be an old-style
+sconsign file containing the signature entries
+for a single directory.
+If neither of those is true,
+<command>sconsign</command>
+attempts to guess the format.
+If that does not work,
+an explicit format
+may be specified using the
+<option>-f</option>
+or
+<option>--format=</option>
+options.
+</para>
+<para>
+If there are no
+<replaceable>file</replaceable>
+arguments, the name
+<filename>.sconsign.dblite</filename>
+is assumed by default.
+</para>
+
+</refsect1>
+
+<refsect1 id='options'>
+<title>OPTIONS</title>
+<para>Various options control what information is printed
+and the format:</para>
+
+<variablelist>
+  <varlistentry>
+  <term>
+    <option>-a</option>,
+    <option>--act</option>,
+    <option>--action</option>
+  </term>
+  <listitem>
+<para>Prints only the build action information
+for all entries or the specified entries.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-c</option>,
+    <option>--csig</option>
+  </term>
+  <listitem>
+<para>Prints only the content signature (csig) information
+for all entries or the specified entries.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-d <replaceable>DIRECTORY</replaceable></option>,
+    <option>--dir=<replaceable>DIRECTORY</replaceable></option>
+  </term>
+  <listitem>
+<para>When the signatures are being
+read from a
+<filename>.dblite</filename>
+file, or the
+<option>-f dblite</option>
+or
+<option>--format=dblite</option>
+options are used,
+prints information about
+only the signatures
+for entries in the specified
+<replaceable>DIRECTORY</replaceable>.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-e <replaceable>ENTRY</replaceable></option>,
+    <option>--entry=<replaceable>ENTRY</replaceable></option>
+  </term>
+  <listitem>
+<para>Prints information about only the specified
+<replaceable>ENTRY</replaceable>.
+Multiple <option>-e</option> options may be used,
+in which case information about each
+<replaceable>ENTRY</replaceable>
+is printed in the order in which the
+options are specified on the command line.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-f <replaceable>FORMAT</replaceable></option>,
+    <option>--format=<replaceable>FORMAT</replaceable></option>
+  </term>
+  <listitem>
+<para>The file(s) to be printed
+are in the specified
+<replaceable>FORMAT</replaceable>.
+Legal values are
+<emphasis role="bold">dblite</emphasis>
+(the SCons.dblite format used by default,
+as well as when the
+<function>SConsignFile</function>
+function is called, except when a filename argument
+of <constant>None</constant> is given)
+and
+<emphasis role="bold">sconsign</emphasis>
+(the format used for an individual
+<filename>.sconsign</filename>
+file in each directory).</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-h</option>,
+    <option>--help</option>
+  </term>
+  <listitem>
+<para>Prints a help message and exits.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-i</option>,
+    <option>--implicit</option>
+  </term>
+  <listitem>
+<para>Prints the list of cached implicit dependencies
+for all entries or for the specified entries.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term><option>--raw</option></term>
+  <listitem>
+<para>Prints a pretty-printed representation
+of the raw Python dictionary that holds
+build information about individual entries
+(both the entry itself and its implicit dependencies).
+An entry's build action is still printed in its usual format.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-r</option>,
+    <option>--readable</option>
+  </term>
+  <listitem>
+<para>Prints timestamps in a human-readable string,
+enclosed in single quotes.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-t</option>,
+    <option>--timestamp</option>
+  </term>
+  <listitem>
+<para>Prints the timestamp information
+for all entries or the specified entries.</para>
+
+  </listitem>
+  </varlistentry>
+  <varlistentry>
+  <term>
+    <option>-v</option>,
+    <option>--verbose</option>
+  </term>
+  <listitem>
+<para>Prints labels identifying each field being printed.</para>
+
+  </listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1 id='environment'>
+<title>ENVIRONMENT</title>
+<variablelist>
+  <varlistentry>
+  <term><envar>SCONS_LIB_DIR</envar></term>
+  <listitem>
+<para>Specifies the directory that contains the SCons Python module directory
+(e.g.
+<filename class='directory'>/home/aroach/scons-src/SCons</filename>).
+</para>
+
+  </listitem>
+  </varlistentry>
+</variablelist>
+</refsect1>
+
+<refsect1 id='see_also'>
+<title>SEE ALSO</title>
+<para>
+<command>scons</command>,
+the SCons User Guide at
+<ulink url="https://scons.org/doc/production/HTML/scons-user.html"/>,
+the SCons source code
+<ulink url="https://github.com/SCons/scons">
+on GitHub</ulink>.
+</para>
+</refsect1>
+
+<refsect1 id='authors'>
+<title>AUTHORS</title>
+<para>Originally: Steven Knight <email>knight@baldmt.com</email>
+  and Anthony Roach <email>aroach@electriceyeball.com</email>.</para>
+  <para>
+Since 2010: The SCons Development Team <email>scons-dev@scons.org</email>.
+</para>
+</refsect1>
+</refentry>

@@ -1,0 +1,504 @@
+<?xml version='1.0'?>
+<!DOCTYPE sconsdoc [
+    <!ENTITY % scons SYSTEM "../scons.mod">
+    %scons;
+
+    <!ENTITY % builders-mod SYSTEM "../generated/builders.mod">
+    %builders-mod;
+    <!ENTITY % functions-mod SYSTEM "../generated/functions.mod">
+    %functions-mod;
+    <!ENTITY % tools-mod SYSTEM "../generated/tools.mod">
+    %tools-mod;
+    <!ENTITY % variables-mod SYSTEM "../generated/variables.mod">
+    %variables-mod;
+]>
+
+<chapter id="chap-separate"
+         xmlns="http://www.scons.org/dbxsd/v1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.scons.org/dbxsd/v1.0 http://www.scons.org/dbxsd/v1.0/scons.xsd">
+<title>Separating Source and Build Trees: Variant Directories</title>
+
+<!--
+
+  __COPYRIGHT__
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+  KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+  WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+  <para>
+
+  It's often useful to keep any built files completely
+  separate from the source files. Consider if you have a
+  project to build software for a variety of different
+  controller hardware.  The boards are able to share a
+  lot of code, so it makes sense to keep them in the same
+  source tree, but certain build options in the source code
+  and header files differ.  If you build "Controller A" first,
+  then "Controller B", on the second build everything would
+  have to be rebuilt, because &SCons; sees that the build
+  instructions differ, and thus the targets that depend on those
+  different instructions are not valid for the current build.
+  Now when you go back and build for "Controller A",
+  things have to be rebuilt from scratch again for the same reason.
+  However, if you can separate the places the output files
+  go, this problem can be avoided.
+  You can even set up to do both builds in one invocation of &SCons;.
+
+  </para>
+
+  <para>
+
+  You can enable this separation by creating one or more
+  <firstterm>variant directory</firstterm> trees
+  that are used to hold the built objects files, libraries,
+  and executable programs, etc.
+  for a specific flavor, or variant, of build.
+  &SCons; provides two ways to do this,
+  one through the &f-link-SConscript; function that we've already seen,
+  and the second through a more flexible &f-link-VariantDir; function.
+
+  </para>
+
+  <para>
+
+  Historical note:  the &VariantDir; function
+  used to be called &BuildDir;, a name which was
+  removed because the &SCons; functionality
+  differs from a familiar model of a "build directory"
+  implemented by other build systems like GNU Autotools.
+  You might still find references to the old name on
+  the Internet in postings about &SCons;, but it no longer works.
+
+  </para>
+
+  <section>
+  <title>Specifying a Variant Directory Tree as Part of an &SConscript; Call</title>
+
+    <para>
+
+    The most straightforward way to establish a variant directory tree
+    relies the fact that the usual way to
+    set up a build hierarchy is to have an
+    SConscript file in the source subdirectory.
+    If you pass a &variant_dir; argument to the
+    &f-link-SConscript; function call:
+
+    </para>
+
+    <scons_example name="separate_ex1">
+      <file name="SConstruct" printme="1">
+SConscript('src/SConscript', variant_dir='build')
+      </file>
+      <file name="src/SConscript">
+env = Environment()
+env.Program('hello.c')
+      </file>
+      <file name="src/hello.c">
+int main() { printf("Hello, world!\n"); }
+      </file>
+    </scons_example>
+
+    <para>
+
+    &SCons; will then build all of the files in
+    the &build; subdirectory:
+
+    </para>
+
+    <scons_output example="separate_ex1" suffix="1">
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>scons -Q</scons_output_command>
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>ls build</scons_output_command>
+    </scons_output>
+
+    <para>
+
+    No files were built in &src;, they went to &build;.
+    The build output might show a bit of a surprise:
+    the object file
+    <filename>build/hello.o</filename>
+    and the executable file
+    <filename>build/hello</filename>
+    were built in the &build; subdirectory,
+    as expected.
+    But even though our &hello_c; file lives in the &src; subdirectory,
+    &SCons; has actually compiled a
+    <filename>build/hello.c</filename> file
+    to create the object file,
+    and that file is now seen in &build;.
+
+    </para>
+
+    <para>
+
+    What's happened is that &SCons; has <emphasis>duplicated</emphasis>
+    the &hello_c; file from the &src; subdirectory
+    to the &build; subdirectory,
+    and built the program from there (it also duplicated &SConscript;).
+    The next section explains why &SCons; does this.
+
+    </para>
+
+  </section>
+
+  <section>
+  <title>Why &SCons; Duplicates Source Files in a Variant Directory Tree</title>
+
+    <para>
+
+    The important thing to understand is that when you set up a variant directory,
+    &SCons; performs the build <emphasis>in that directory</emphasis>.
+    It turns out it's easiest to ensure where build products end up
+    by just building in place.
+    Since the build is happening in a place different from where the
+    sources are, the most straightforward way to guarantee a correct build
+    is for &SCons; to copy them there.
+
+    </para>
+
+    <para>
+
+    The most direct reason to duplicate source files
+    in variant directories
+    is simply that some tools (mostly older versions)
+    are written to only build their output files
+    in the same directory as the source files.
+    In this case, the choices are either
+    to build the output file in the source directory
+    and move it to the variant directory,
+    or to duplicate the source files in the variant directory.
+
+    </para>
+
+    <para>
+
+    Additionally,
+    relative references between files
+    can cause problems if we don't
+    just duplicate the hierarchy of source files
+    in the variant directory.
+    You can see this at work in
+    use of the C preprocessor <literal>#include</literal>
+    mechanism with double quotes, not angle brackets:
+
+    </para>
+
+    <sconstruct>
+#include "file.h"
+    </sconstruct>
+
+    <para>
+
+    The <emphasis>de facto</emphasis> standard behavior
+    for most C compilers in this case
+    is to first look in the same directory
+    as the source file that contains the <literal>#include</literal> line,
+    then to look in the directories in the preprocessor search path.
+    Add to this that the &SCons; implementation of
+    support for code repositories
+    (described below)
+    means not all of the files
+    will be found in the same directory hierarchy,
+    and the simplest way to make sure
+    that the right include file is found
+    is to duplicate the source files into the variant directory,
+    which provides a correct build
+    regardless of the original location(s) of the source files.
+
+    </para>
+
+    <para>
+
+    Although source-file duplication guarantees a correct build
+    even in these end-cases,
+    it <emphasis>can</emphasis> usually be safely disabled.
+    The next section describes
+    how you can disable the duplication of source files
+    in the variant directory.
+
+    </para>
+
+  </section>
+
+  <section>
+  <title>Telling &SCons; to Not Duplicate Source Files in the Variant Directory Tree</title>
+
+    <para>
+
+    In most cases and with most tool sets,
+    &SCons; can place its target files in a build subdirectory
+    <emphasis>without</emphasis>
+    duplicating the source files
+    and everything will work just fine.
+    You can disable the default &SCons; behavior
+    by specifying <literal>duplicate=False</literal>
+    when you call the &SConscript; function:
+
+    </para>
+
+    <sconstruct>
+SConscript('src/SConscript', variant_dir='build', duplicate=False)
+    </sconstruct>
+
+    <para>
+
+    When this flag is specified,
+    &SCons; uses the variant directory
+    like most people expect--that is,
+    the output files are placed in the variant directory
+    while the source files stay in the source directory:
+
+    </para>
+
+    <screen>
+% <userinput>ls src</userinput>
+SConscript
+hello.c
+% <userinput>scons -Q</userinput>
+cc -c src/hello.c -o build/hello.o
+cc -o build/hello build/hello.o
+% <userinput>ls build</userinput>
+hello
+hello.o
+    </screen>
+
+  </section>
+
+  <section>
+  <title>The &VariantDir; Function</title>
+
+    <para>
+
+    Use the &VariantDir; function to establish that target
+    files should be built in a separate directory
+    from the source files:
+
+    </para>
+
+    <scons_example name="separate_builddir">
+      <file name="SConstruct" printme="1">
+VariantDir('build', 'src')
+env = Environment()
+env.Program('build/hello.c')
+      </file>
+      <file name="src/hello.c">
+int main() { printf("Hello, world!\n"); }
+      </file>
+    </scons_example>
+
+    <para>
+
+    Note that when you're not using
+    an &SConscript; file in the &src; subdirectory,
+    you must actually specify that
+    the program must be built from
+    the <filename>build/hello.c</filename>
+    file that &SCons; will duplicate in the
+    &build; subdirectory.
+
+    </para>
+
+    <para>
+
+    When using the &VariantDir; function directly,
+    &SCons; still duplicates the source files
+    in the variant directory by default:
+
+    </para>
+
+    <scons_output example="separate_builddir" suffix="1">
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>scons -Q</scons_output_command>
+      <scons_output_command>ls build</scons_output_command>
+    </scons_output>
+
+    <para>
+
+    You can specify the same <literal>duplicate=False</literal> argument
+    that you can specify for an &SConscript; call:
+
+    </para>
+
+    <scons_example name="separate_duplicate0">
+      <file name="SConstruct" printme="1">
+VariantDir('build', 'src', duplicate=False)
+env = Environment()
+env.Program('build/hello.c')
+      </file>
+      <file name="src/hello.c">
+int main() { printf("Hello, world!\n"); }
+      </file>
+    </scons_example>
+
+    <para>
+
+    In which case &SCons;
+    will disable duplication of the source files:
+
+    </para>
+
+    <scons_output example="separate_duplicate0" suffix="1">
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>scons -Q</scons_output_command>
+      <scons_output_command>ls build</scons_output_command>
+    </scons_output>
+
+  </section>
+
+  <section>
+  <title>Using &VariantDir; With an &SConscript; File</title>
+
+    <para>
+
+    Even when using the &VariantDir; function,
+    it's more natural to use it with
+    a subsidiary &SConscript; file,
+    because then you don't have to adjust your individual
+    build instructions to use the variant directory path.
+    For example, if the
+    <filename>src/SConscript</filename>
+    looks like this:
+
+    </para>
+
+    <scons_example name="separate_builddir_sconscript">
+      <file name="SConstruct">
+VariantDir('build', 'src')
+SConscript('build/SConscript')
+      </file>
+      <file name="src/SConscript" printme="1">
+env = Environment()
+env.Program('hello.c')
+      </file>
+      <file name="src/hello.c">
+int main() { printf("Hello, world!\n"); }
+      </file>
+    </scons_example>
+
+    <para>
+
+    Then our &SConstruct; file could look like:
+
+    </para>
+
+    <scons_example_file example="separate_builddir_sconscript" name="SConstruct">
+    </scons_example_file>
+
+    <para>
+
+    Yielding the following output:
+
+    </para>
+
+    <scons_output example="separate_builddir_sconscript" suffix="1">
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>scons -Q</scons_output_command>
+      <scons_output_command>ls build</scons_output_command>
+    </scons_output>
+
+    <para>
+
+    Notice that this is completely equivalent
+    to the use of &SConscript; that we
+    learned about in the previous section.
+
+    </para>
+
+  </section>
+
+  <section>
+  <title>Using &Glob; with &VariantDir;</title>
+
+    <para>
+
+    The &f-link-Glob; file name pattern matching function
+    works just as usual when using &VariantDir;.
+    For example, if the
+    <filename>src/SConscript</filename>
+    looks like this:
+
+    </para>
+
+    <scons_example name="separate_glob_builddir_sconscript">
+      <file name="SConstruct">
+VariantDir('build', 'src')
+SConscript('build/SConscript')
+      </file>
+      <file name="src/SConscript" printme="1">
+env = Environment()
+env.Program('hello', Glob('*.c'))
+      </file>
+      <file name="src/f1.c">
+#include "f2.h"
+int main() { printf(f2()); }
+      </file>
+      <file name="src/f2.c">
+const char * f2() { return("Hello, world!\n"); }
+      </file>
+      <file name="src/f2.h">
+const char * f2();
+      </file>
+    </scons_example>
+
+    <para>
+
+    Then with the same &SConstruct; file as in the previous section,
+    and source files <filename>f1.c</filename>
+    and <filename>f2.c</filename> in src,
+    we would see the following output:
+
+    </para>
+
+    <scons_output example="separate_glob_builddir_sconscript" suffix="1">
+      <scons_output_command>ls src</scons_output_command>
+      <scons_output_command>scons -Q</scons_output_command>
+      <scons_output_command>ls build</scons_output_command>
+    </scons_output>
+
+    <para>
+
+    The &Glob; function returns Nodes in the
+    <filename>build/</filename> tree, as you'd expect.
+
+    </para>
+
+  </section>
+
+  <!--
+
+  <section>
+  <title>Why You'd Want to Call &VariantDir; Instead of &SConscript;</title>
+
+    <para>
+
+    XXX why call VariantDir() instead of SConscript(variant_dir=)
+
+    </para>
+
+  </section>
+
+  -->
+
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="variants.xml"/>
+
+</chapter>
