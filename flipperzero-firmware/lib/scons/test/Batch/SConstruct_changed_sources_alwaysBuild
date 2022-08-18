@@ -1,0 +1,8 @@
+# Testcase for tigris bug 2622
+
+obj = Object('changed_sources_main.cpp')
+AlwaysBuild(obj)
+
+program = Program('test', source=[obj])
+
+Default(program)

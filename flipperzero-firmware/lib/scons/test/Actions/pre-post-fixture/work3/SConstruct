@@ -1,0 +1,11 @@
+def pre(target, source, env):
+    pass
+def post(target, source, env):
+    pass
+def build(target, source, env):
+    with open(str(target[0]), 'wb') as f:
+        f.write(b'build()\n')
+env = Environment(tools=[])
+AddPreAction('dir', pre)
+AddPostAction('dir', post)
+env.Command('dir/file', [], build)
