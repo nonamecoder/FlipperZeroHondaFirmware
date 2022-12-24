@@ -15,10 +15,29 @@ This firmware was built and designed by SkorP, the Sub-GHz architect for Flipper
 
 ## How to Install
 
-1. Download .dfu file and settings_user
-2. Open QFlipper and flash .dfu file to Flipper Zero
-3. Place setting_user file under  “\subghz\assets\” 
+1. Open QFlipper and flash .dfu file to Flipper Zero
+2. Place setting_user file under  “\subghz\assets\” 
 
+OR 
+Add the code below to settings_user
+</details>
+
+
+<details><summary>Flipper Zero custom preset modulation for Honda keyfobs with FCC ID KR5V2X</summary>
+  
+```
+# Custom preset
+Custom_preset_name: Honda1
+Custom_preset_module: CC1101
+#                                                          G2    G3    G4    D                 L0    L1    L2
+Custom_preset_data: 02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 36 10 69 15 32 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00
+
+Custom_preset_name: Honda2
+Custom_preset_module: CC1101
+#                                                          G2    G3    G4    D                 L0    L1    L2
+Custom_preset_data: 02 0D 0B 06 08 32 07 04 14 00 13 02 12 07 11 36 10 E9 15 32 18 18 19 16 1D 92 1C 40 1B 03 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00
+```
+</details>
 
 ## How to Use
 - SubGHz &rarr; Read RAW 
@@ -27,8 +46,7 @@ This firmware was built and designed by SkorP, the Sub-GHz architect for Flipper
 
 Note: Honda2 modulation is more sensitive, hence more noisy.
 
-UPDATE: If you're at DEFCON CHV, place the Lock and Unlock files under subghz folder and you should be all set to play with the car!
-
+UPDATE: There is no need to flash the .dfu file as the updates have been pushed mainstream, modifying the settings_user file should do the trick!
 
 Note: Mac adds a .crash file to the end, remove the extension  when you put it on the flipper!(you can rename the file in the QFlipper app)
 
