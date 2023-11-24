@@ -2,7 +2,7 @@ Filetype: Flipper SubGhz Setting File
 Version: 1
 
 # Full reset of standard frequencies
-All_reload_frequency: false
+All_reload_frequency: true
 
 # Default Frequency
 #frequency_default: 433920000
